@@ -9,8 +9,8 @@ export var planeMeshSubdivideDepth = 200
 export var planeMeshSubdivideWidth = 200
 export var vertexAmplitude = 60
 
-export var cameraSpeed = 1
-export var movementMultiplier = 5
+export var cameraSpeed = 20
+export var movementMultiplier = 3
 
 var maxVertexHeight = 0
 
@@ -55,13 +55,21 @@ func _ready():
 	add_child(meshInstance)
 	
 
-var simpleCounter = 0
-
 func _process(delta):
-	var camAngle = $Rotate.rotation_degrees.y
-	if Input.is_action_pressed("ui_accept"):
-		$Rotate.rotation_degrees.y = 0
-		camAngle = 0
+	var camAngle = $Translate/Rotate.rotation_degrees.y
+	if Input.is_action_just_pressed("ui_accept"):
+		if camAngle == 0:
+			$Translate/Rotate.rotation_degrees.y = 90
+			camAngle = 90
+		elif camAngle == 90:
+			$Translate/Rotate.rotation_degrees.y = 180
+			camAngle = 180
+		elif camAngle == 180:
+			$Translate/Rotate.rotation_degrees.y = 270
+			camAngle = 270
+		else:
+			$Translate/Rotate.rotation_degrees.y = 0
+			camAngle = 0
 	
 	var rotateValue = 0
 	if Input.is_action_pressed("ui_pan_right"):
@@ -72,21 +80,43 @@ func _process(delta):
 		rotateValue += 100
 	if Input.is_action_pressed("ui_pan_left_fast"):
 		rotateValue -= 100
-	$Rotate.rotation_degrees.y = camAngle + (delta * rotateValue)
+	$Translate/Rotate.rotation_degrees.y = camAngle + (delta * rotateValue)
 	
 	# Might have changed the angle, lets update the value
-	camAngle = $Rotate.rotation_degrees.y
-	var camPos = $Rotate/Camera.translation
+	camAngle = $Translate/Rotate.rotation_degrees.y
+	var camPos = $Translate/Rotate/Camera.translation
 	if Input.is_action_pressed("ui_zoom_in") && camPos.y > 10:
-		$Rotate/Camera.translate(Vector3(0, delta * -50, delta * -50))
+		$Translate/Rotate/Camera.translate(Vector3(0, delta * -50, delta * -50))
 	if Input.is_action_pressed("ui_zoom_out") && camPos.y < 100:
-		$Rotate/Camera.translate(Vector3(0, delta * 50, delta * 50))
+		$Translate/Rotate/Camera.translate(Vector3(0, delta * 50, delta * 50))
 	
-	if Input.is_action_pressed("ui_right"):
-		$Rotate.translate(Vector3(cos(camAngle) * delta * cameraSpeed, 0, sin(camAngle) * delta * cameraSpeed))
-	if Input.is_action_pressed("ui_left"):
-		$Rotate.translate(Vector3(-cos(camAngle) * delta * cameraSpeed, 0, -sin(camAngle) * delta * cameraSpeed))
+	var vectorTranslate = Vector3(0, 0, 0)
 	if Input.is_action_pressed("ui_up"):
-		$Rotate.translate(Vector3(-sin(camAngle) * delta * cameraSpeed, 0, -cos(camAngle) * delta * cameraSpeed))
+		vectorTranslate.x += (-sin(deg2rad(camAngle)) * delta * cameraSpeed)
+		vectorTranslate.z += (-cos(deg2rad(camAngle)) * delta * cameraSpeed)
+	if Input.is_action_pressed("ui_up_shift"):
+		vectorTranslate.x += (-sin(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+		vectorTranslate.z += (-cos(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
 	if Input.is_action_pressed("ui_down"):
-		$Rotate.translate(Vector3(sin(camAngle) * delta * cameraSpeed, 0, cos(camAngle) * delta * cameraSpeed))
+		vectorTranslate.x += (sin(deg2rad(camAngle)) * delta * cameraSpeed)
+		vectorTranslate.z += (cos(deg2rad(camAngle)) * delta * cameraSpeed)
+	if Input.is_action_pressed("ui_down_shift"):
+		vectorTranslate.x += (sin(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+		vectorTranslate.z += (cos(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+	if Input.is_action_pressed("ui_left"):
+		vectorTranslate.x += (-cos(deg2rad(camAngle)) * delta * cameraSpeed)
+		vectorTranslate.z += (sin(deg2rad(camAngle)) * delta * cameraSpeed)
+	if Input.is_action_pressed("ui_left_shift"):
+		vectorTranslate.x += (-cos(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+		vectorTranslate.z += (sin(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+	if Input.is_action_pressed("ui_right"):
+		vectorTranslate.x += (cos(deg2rad(camAngle)) * delta * cameraSpeed)
+		vectorTranslate.z += (-sin(deg2rad(camAngle)) * delta * cameraSpeed)
+	if Input.is_action_pressed("ui_right_shift"):
+		vectorTranslate.x += (cos(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+		vectorTranslate.z += (-sin(deg2rad(camAngle)) * delta * cameraSpeed * movementMultiplier)
+	$Translate.translate(vectorTranslate)
+	
+	var printString = "CamAngle: %s sin(camAngle): %s cos(camAngle): %s"
+	$HUD1.update_text(printString % [camAngle, sin(deg2rad(camAngle)), cos(deg2rad(camAngle))])
+	
