@@ -1,12 +1,17 @@
 extends Spatial
 
-export var spawnRate = 1
-
 export var cameraSpeed = 20
 export var movementMultiplier = 3
 
+export var maxX = 10
+export var minX = -10
+export var maxY = 10
+export var minY = -10
+export var maxZ = 10
+export var minZ = -10
+
 func _ready():
-	pass
+	pass # Replace with function body.
 
 func _process(delta):
 	# Rotation Presets
@@ -79,9 +84,30 @@ func _process(delta):
 			vectorTranslate.z += (-sin(deg2rad(camAngle)) * delta * cameraSpeed)
 	$Translate.translate(vectorTranslate)
 	
-	# Update HUD message
-#	var printString = "CamAngle: %s sin(camAngle): %s cos(camAngle): %s"
-#	$HUD.update_text(printString % [camAngle, sin(deg2rad(camAngle)), cos(deg2rad(camAngle))])
+	# Get height from position
+	var position = $Translate.translation
+	var MoveTo = position
 	
-	# Get current location
+	var terrain = get_node("/root/World/Terrain")
+	var height = terrain.get_coord_height(position.x, position.z)
+	MoveTo.y = height
 	
+	# Check in bounds
+	if position.x > maxX:
+		MoveTo.x = maxX
+	elif position.x < minX:
+		MoveTo.x = minX
+	if position.y > maxY:
+		MoveTo.y = maxY
+	elif position.y < minY:
+		MoveTo.y = minY
+	if position.z > maxZ:
+		MoveTo.z = maxZ
+	elif position.z < minZ:
+		MoveTo.z = minZ
+	
+	if MoveTo != position:
+		$Translate.translation = MoveTo
+
+func position():
+	return $Translate.translation

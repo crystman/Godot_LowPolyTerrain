@@ -16,7 +16,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Low Poly Terrain"
-run/main_scene="res://World.tscn"
+run/main_scene="res://World/World.tscn"
 config/icon="res://icon.png"
 
 [input]
@@ -77,4 +77,4 @@ ui_shift={
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+environment/default_environment="res://Terrain/default_env.tres"

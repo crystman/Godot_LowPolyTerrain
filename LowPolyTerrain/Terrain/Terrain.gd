@@ -2,16 +2,18 @@ extends Spatial
 
 export var noisePeriod = 80
 export var noiseOctave = 6
-export var planeMeshSize = Vector2(100, 100)
-export var planeMeshSubdivideDepth = 99
-export var planeMeshSubdivideWidth = 99
+export var planeMeshSize = Vector2(400, 400)
+export var planeMeshSubdivideDepth = 399
+export var planeMeshSubdivideWidth = 399
 export var vertexAmplitude = 60
 
-var maxVertexHeight = 0
+var maxVertexHeight = 9223372036854775807
+var minVertexHeight = maxVertexHeight + 1
 var dataTool
+var noise
 
 func _ready():
-	var noise = OpenSimplexNoise.new()
+	noise = OpenSimplexNoise.new()
 	noise.period = noisePeriod
 	noise.octaves = noiseOctave
 	
@@ -32,6 +34,7 @@ func _ready():
 		var vertex = dataTool.get_vertex(i)
 		vertex.y = noise.get_noise_3d(vertex.x, vertex.y, vertex.z) * vertexAmplitude
 		maxVertexHeight = max(maxVertexHeight, vertex.y)
+		minVertexHeight = min(minVertexHeight, vertex.y)
 		dataTool.set_vertex(i, vertex)
 #		vertex = dataTool.get_vertex(i)
 #		var message = "Vertex %s: %s %s %s"
@@ -47,15 +50,9 @@ func _ready():
 	surfaceTool.generate_normals()
 	
 	$MeshInstance.mesh = surfaceTool.commit()
-	$MeshInstance.set_surface_material(0, load("res://terrain.material"))
+	$MeshInstance.set_surface_material(0, load("res://Terrain/terrain.material"))
 	
 	$MeshInstance.create_trimesh_collision()
 	
 func get_coord_height(x, z):
-	var message = "coordinates to get height for: %s %s"
-	print(message % [x, z])
-	for i in range(dataTool.get_vertex_count()):
-		var vertex = dataTool.get_vertex(i)
-		if x == vertex.x & z == vertex.z:
-			return vertex.y
-	return 0.0
+	return noise.get_noise_3d(x, 0, z) * vertexAmplitude
