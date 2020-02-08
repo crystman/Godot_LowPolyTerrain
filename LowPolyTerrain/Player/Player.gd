@@ -16,7 +16,7 @@ func _ready():
 func _process(delta):
 	# Rotation Presets
 	var camAngle = $Translate/Rotate.rotation_degrees.y
-	if Input.is_action_just_pressed("ui_accept"):
+	if Input.is_action_just_pressed("ui_refresh"):
 		if camAngle == 0:
 			$Translate/Rotate.rotation_degrees.y = 90
 			camAngle = 90
